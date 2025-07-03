@@ -1,6 +1,13 @@
 import datetime
 import json
 from decimal import Decimal
+from locale import currency
+
+import requests
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 import pandas as pd
 import logging
@@ -102,4 +109,71 @@ def get_list_of_stocks() -> tuple[list, list]:
     stocks = data.get('user_stocks')
     return currencies, stocks
 
-get_list_of_stocks()
+def get_stocks_prices():
+    """Функция для получения котировок акций."""
+    url = os.getenv('URL')
+    apy_key = os.getenv('API_KEY')
+    currencies, stocks = get_list_of_stocks()
+    price_stock = []
+    current_currencies = []
+    current_stock = (stock for stock in stocks)
+    current_currency = (user_currency for user_currency in currencies)
+
+    for _ in range(len(stocks)):
+        get_params = {
+                        'function': 'GLOBAL_QUOTE',
+                        'symbol': next(current_stock),
+                        "apikey": apy_key
+                      }
+
+        r = requests.get(url, params=get_params)
+        data_stock = r.json()
+        price_stock.append({
+                              "stock": data_stock['Global Quote']['01. symbol'],
+                              "price": data_stock['Global Quote']['05. price']
+                            })
+        # {
+        #     "Global Quote": {
+        #         "01. symbol": "IBM",
+        #         "02. open": "290.0000",
+        #         "03. high": "290.1900",
+        #         "04. low": "286.9000",
+        #         "05. price": "287.6500",
+        #         "06. volume": "3257515",
+        #         "07. latest trading day": "2025-07-02",
+        #         "08. previous close": "291.2000",
+        #         "09. change": "-3.5500",
+        #         "10. change percent": "-1.2191%"
+        #     }
+        # }
+
+    for _ in range(len(currencies)):
+        get_params = {
+                        'function': 'CURRENCY_EXCHANGE_RATE',
+                        'from_currency': 'RUB',
+                        'to_currency': next(current_currency),
+                        "apikey": apy_key
+                      }
+        r = requests.get(url, params=get_params)
+        data_currency = r.json()
+        current_currencies.append({
+                              "currency": data_currency['Realtime Currency Exchange Rate']['3. To_Currency Code'],
+                              "rate": data_currency['Realtime Currency Exchange Rate']['5. Exchange Rate']
+                            })
+    print(price_stock)
+    print(current_currencies)
+
+get_stocks_prices()
+# {
+#     "Realtime Currency Exchange Rate": {
+#         "1. From_Currency Code": "USD",
+#         "2. From_Currency Name": "United States Dollar",
+#         "3. To_Currency Code": "JPY",
+#         "4. To_Currency Name": "Japanese Yen",
+#         "5. Exchange Rate": "145.04100000",
+#         "6. Last Refreshed": "2025-07-03 18:40:45",
+#         "7. Time Zone": "UTC",
+#         "8. Bid Price": "145.03910000",
+#         "9. Ask Price": "145.04640000"
+#     }
+# }
