@@ -1,6 +1,6 @@
 import datetime
+import json
 from decimal import Decimal
-from math import ceil
 
 import pandas as pd
 import logging
@@ -86,16 +86,20 @@ def get_expenses_and_cashback() -> list: #df_date: DataFrame
         logger_excel.error('Ошибка, получен пустой список. Возврат пустого списка')
         return []
 
-get_expenses_and_cashback()
-# "cards": [
-#     {
-#       "last_digits": "5814",
-#       "total_spent": 1262.00,
-#       "cashback": 12.62
-#     },
-#     {
-#       "last_digits": "7512",
-#       "total_spent": 7.94,
-#       "cashback": 0.08
-#     }
-#   ],
+
+def get_json_from_file(path_to_file: str = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/user_settings.json') -> json:
+    """Функция для считывания json из файла"""
+    with open(path_to_file) as f:
+        data = json.load(f)
+        return data
+
+
+def get_list_of_stocks() -> tuple[list, list]:
+    """Функция для получения из json списка акций и выбранных пользователем валют."""
+
+    data = get_json_from_file()
+    currencies = data.get('user_currencies')
+    stocks = data.get('user_stocks')
+    return currencies, stocks
+
+get_list_of_stocks()
