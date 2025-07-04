@@ -1,7 +1,7 @@
 import datetime
 import json
 from decimal import Decimal
-
+from typing import Any
 
 import requests
 
@@ -20,6 +20,7 @@ logger_expenses = logging.getLogger('get_expenses_and_cashback')
 logger_top_transact = logging.getLogger('top_transaction')
 logger_stock = logging.getLogger('get_stock')
 logger_currency_exchange = logging.getLogger('get_currency_exchange')
+logger_read_json = logging.getLogger('read_json')
 
 
 def get_date():
@@ -119,67 +120,85 @@ def get_expenses_and_cashback() -> list: #df_date: DataFrame
         return []
 
 
-def get_json_from_file(path_to_file: str = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/user_settings.json') -> json:
-    """Функция для считывания из json-файла список акций и валюты."""
-    with open(path_to_file) as f:
-        data = json.load(f)
-        return data
+def read_json_from_file(path_to_file: str = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/user_settings.json') -> \
+tuple[list, list]:
+    """Функция для считывания из json-файла списка акций и валют."""
+    try:
+        logger_read_json.info('Старт работы функции')
+        with open(path_to_file) as f:
+            data = json.load(f)
+            currencies = data.get('user_currencies')
+            stocks = data.get('user_stocks')
+            logger_read_json.info('Успешное открытие файла и возврат списка акций и валют.')
+            return currencies, stocks
+    except Exception as ex:
+        logger_read_json.error(f'Ошибка в работе функции: {ex}')
+        return [], []
 
 
-def get_list_of_stocks() -> tuple[list, list]:
-    """Функция для получения из json списка акций и выбранных пользователем валют."""
+def get_stocks_prices(stocks: list) -> list:
+    """Функция для получения котировок акций. Принимает список акций и возвращает их стоиость."""
+    if stocks:
+        logger_stock.info('Получен список акций. Старт работы функции')
+        url = os.getenv('URL')
+        apy_key = os.getenv('API_KEY')
+        price_stock = []
+        current_stock = (stock for stock in stocks)
 
-    data = get_json_from_file()
-    currencies = data.get('user_currencies')
-    stocks = data.get('user_stocks')
-    return currencies, stocks
+        for _ in range(len(stocks)):
+            get_params = {
+                            'function': 'GLOBAL_QUOTE',
+                            'symbol': next(current_stock),
+                            "apikey": apy_key
+                          }
+
+            response_stock = requests.get(url, params=get_params)
+            if response_stock.status_code != 200:
+                logger_stock.error(f'Получена ошибка на запрос: {response_stock}')
+                return []
+
+            data_stock = response_stock.json()
+            price_stock.append({
+                                  "stock": data_stock['Global Quote']['01. symbol'],
+                                  "price": data_stock['Global Quote']['05. price']
+                                })
+        logger_stock.info('')
+        return price_stock
+    logger_stock.error('Получен пустой список акций, возврат пустого списка!')
+    return []
 
 
-def get_stocks_prices() -> list:
-    """Функция для получения котировок акций."""
+def get_exchange_currency(currencies: list) -> list:
+    """Функция для получения курсов валют. Принимает список валют и возвращает курс к рублю."""
+    if currencies:
+        logger_currency_exchange.info('Получен список валют. Старт работы функции')
+        url = os.getenv('URL_CURRENCY')
+        apy_key = os.getenv('API_KEY_CURRENCY')
+        currency_pairs = [f'{user_currency}RUB' for user_currency in currencies]
+        pairs = ','.join(currency_pairs)
+        logger_currency_exchange.info('Созданы валютные пары')
 
-    url = os.getenv('URL')
-    apy_key = os.getenv('API_KEY')
-    currencies, stocks = get_list_of_stocks()
-    price_stock = []
-    current_stock = (stock for stock in stocks)
-
-    for _ in range(len(stocks)):
         get_params = {
-                        'function': 'GLOBAL_QUOTE',
-                        'symbol': next(current_stock),
-                        "apikey": apy_key
+                        'get': 'rates',
+                        'pairs': pairs,
+                        "key": apy_key
                       }
+        response_currency = requests.get(url, params=get_params)
 
-        req_stock = requests.get(url, params=get_params)
-        data_stock = req_stock.json()
-        price_stock.append({
-                              "stock": data_stock['Global Quote']['01. symbol'],
-                              "price": data_stock['Global Quote']['05. price']
-                            })
-    return price_stock
+        if response_currency.status_code != 200:
+            logger_currency_exchange.error(f'Получена ошибка на запрос: {response_currency}')
+            return []
 
+        data_currency =  response_currency.json()
+        current_currencies = [
+            {
+              "currency": currency_pair,
+              "rate": data_currency['data'][currency_pair]
+            }
+            for currency_pair in currency_pairs]
 
-def get_exchange_currency() -> list:
-    """Функция для получения курсов валют"""
+        logger_currency_exchange.info('Успешный возврат курсов валют')
+        return current_currencies
 
-    url = os.getenv('URL_CURRENCY')
-    apy_key = os.getenv('API_KEY_CURRENCY')
-    currencies, stocks = get_list_of_stocks()
-    currency_pairs = [f'{user_currency}RUB' for user_currency in currencies]
-    pairs = ','.join(currency_pairs)
-
-    get_params = {
-                    'get': 'rates',
-                    'pairs': pairs,
-                    "key": apy_key
-                  }
-    req_currency = requests.get(url, params=get_params)
-    data_currency =  req_currency.json()
-    current_currencies = [
-        {
-          "currency": currency_pair,
-          "rate": data_currency['data'][currency_pair]
-        }
-        for currency_pair in currency_pairs]
-    return current_currencies
+    logger_currency_exchange.error('Получен пустой список валют, возврат пустого списка!')
+    return []
