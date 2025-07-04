@@ -17,6 +17,7 @@ from pandas.core.interchange.dataframe_protocol import DataFrame
 logger_date = logging.getLogger('get_date')
 logger_excel = logging.getLogger('excel_reader')
 logger_expenses = logging.getLogger('get_expenses_and_cashback')
+logger_top_transact = logging.getLogger('top_transaction')
 
 
 def get_date():
@@ -43,11 +44,7 @@ def excel_file_reader(path_to_file: str = 'C:/Users/rubik/OneDrive/Documents/Pyt
 #list_transactions: list
 
 def get_info(date_to: str):
-    """Функция, которая принимает список транзакций, период даты и возвращает по каждой карте:
-- последние 4 цифры карты;
-- общая сумма расходов;
-- кешбэк (1 рубль на каждые 100 рублей).
-- Топ-5 транзакций по сумме платежа."""
+    """Функция, которая принимает список транзакций, период даты и возвращает датафрейм на период даты."""
     date_day = int(date_to[8:10])
     date_month = int(date_to[5:7])
     date_year = int(date_to[:4])
@@ -55,13 +52,39 @@ def get_info(date_to: str):
     df_transactions = pd.DataFrame(list_transactions)
     df_transactions['Дата операции'] = pd.to_datetime(df_transactions['Дата операции'], format='%d.%m.%Y %H:%M:%S')
     df_date =df_transactions[(df_transactions['Дата операции'].dt.day <= date_day) & (df_transactions['Дата операции'].dt.month == date_month) & (df_transactions['Дата операции'].dt.year== date_year)]
-
-    # top_transactions = df_date.groupby('Дата платежа').apply(lambda x: max(x['Сумма платежа']))
-    top_transactions = df_date.sort_values(['Сумма платежа'])
-
-    # print(top_transactions)
     return df_date
 # get_info('2021-12-05')
+
+
+def top_transaction() -> list:
+    """Функция принимает датафрейм и возвращает топ 5 транзакций"""
+    df_top_transactions = get_info('2021-12-10')
+    logger_top_transact.info('Старт работы функции')
+    try:
+        if df_top_transactions:
+            logger_top_transact.info('Получен список транзакций')
+            df_top = df_top_transactions.sort_values('Сумма платежа', ascending= False, key= abs).iloc[0:5:]
+            logger_top_transact.info('Список отсортирован по сумме платежа')
+            df_top_day = df_top.sort_values('Дата платежа')
+            logger_top_transact.info('Отсортированный список, отсортирован по дате')
+            result_top = []
+            for index, row in df_top_day.iterrows():
+                result_top.append(
+                                   {
+                                    "date" : row['Дата платежа'],
+                                    "amount" : row['Сумма платежа'],
+                                    "category" : row['Категория'],
+                                    "description" : row['Описание']
+                                   }
+                                  )
+            logger_top_transact.info('Список топ 5 транзакций сформирован')
+            return result_top
+        logger_top_transact.error('Получен пустой датафрейм, возврат пустого списка')
+        return []
+    except Exception as ex:
+        logger_top_transact.error(f'Произошла ошибка в работе функции: {ex}')
+        return []
+
 
 def get_expenses_and_cashback() -> list: #df_date: DataFrame
     """Функция, которая принимает отсортированный по дате датафрейм со списком транзакций, возвращает по каждой карте:
@@ -163,7 +186,7 @@ def get_stocks_prices():
     print(price_stock)
     print(current_currencies)
 
-get_stocks_prices()
+# get_stocks_prices()
 # {
 #     "Realtime Currency Exchange Rate": {
 #         "1. From_Currency Code": "USD",
