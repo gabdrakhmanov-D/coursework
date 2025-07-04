@@ -1,6 +1,11 @@
+import json
 import logging
+import pandas as pd
 
-from src.utils import get_date
+from numpy.f2py.crackfortran import is_free_format
+
+from src.utils import get_date, read_json_from_file, excel_file_reader, top_transaction, filter_transactions, \
+    get_expenses_and_cashback, get_stocks_prices, get_exchange_currency
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(filename)s - %(funcName)s - %(levelname)s - %(message)s',
@@ -8,15 +13,21 @@ logging.basicConfig(level=logging.DEBUG,
                     filemode='w',
                     encoding='utf-8')
 
-logger_file = logging.getLogger('select_file')
-logger_filter = logging.getLogger('select_filter')
-logger_sort_by_data = logging.getLogger('sort_by_data')
-logger_rub_transact = logging.getLogger('rub_transact')
-logger_by_pattern = logging.getLogger('filter_by_pattern')
-logger_main = logging.getLogger('main')
+logger_user_transactions = logging.getLogger('user_transactions')
 
-def main():
-    current_date = get_date()
+
+def get_user_transactions(current_date: str) -> json:
+    """Функция принимает текущую дату и возвращает:
+    Приветствие в формате
+    "???", где ??? — «Доброе утро» / «Добрый день» / «Добрый вечер» / «Доброй ночи» в зависимости от текущего времени.
+    По каждой карте:
+    - последние 4 цифры карты;
+    - общая сумма расходов;
+    - кешбэк (1 рубль на каждые 100 рублей).
+    - Топ-5 транзакций по сумме платежа.
+    - Курс валют.
+    - Стоимость акций из S&P500."""
+
     if 12 > int(current_date[11:13]) > 6:
         greeting_value = 'Доброе утро!'
     elif 18 > int(current_date[11:13]) > 12:
@@ -25,6 +36,30 @@ def main():
         greeting_value = 'Добрый вечер!'
     else:
         greeting_value = 'Доброй ночи'
-    return greeting_value
+
+    path_to_json_user_parameters = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/user_settings.json'
+    path_to_user_excel_transactions = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/operations.xlsx'
+
+    user_transactions_from_excel = excel_file_reader(path_to_user_excel_transactions)
+    filtered_df = filter_transactions(user_transactions_from_excel, current_date)
+    if filtered_df.empty:
+        raise Exception('Ошибка в работе программы, не получены данные о транзакциях')
+
+    user_currency, user_stocks = read_json_from_file(path_to_json_user_parameters)
+    # top_user_transactions = top_transaction(filtered_df)
+    # user_expenses_and_cashback = get_expenses_and_cashback(filtered_df)
+    user_stocks_prices = get_stocks_prices(user_stocks)
+    # user_currency_exchange = get_exchange_currency(user_currency)
+
+    result = {
+        # "greeting": greeting_value,
+        # "cards" : user_expenses_and_cashback,
+        # "top_transactions" : top_user_transactions,
+        # "currency_rates" : user_currency_exchange,
+        "stock_prices" : user_stocks_prices
+    }
+    return json.dumps(result, indent=4, ensure_ascii=False)
+
+
 if __name__ == '__main__':
-    print(main())
+    print(get_user_transactions(get_date()))

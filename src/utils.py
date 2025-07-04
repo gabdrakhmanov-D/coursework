@@ -32,8 +32,8 @@ def get_date():
     current_date_time = datetime.datetime.now()
     date_str= current_date_time.strftime("%Y-%m-%d %H:%M:%S")
     logger_date.info('Дата успешно сформирована, возврат даты')
-    return date_str
-
+    # return date_str
+    return '2021-12-05 15:20:53.'
 
 def excel_file_reader(path_to_file: str = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/operations.xlsx') -> list:
     """Функция для считывания финансовых операций из Excel, принимает путь к файлу Excel в качестве аргумента.
@@ -48,13 +48,13 @@ def excel_file_reader(path_to_file: str = 'C:/Users/rubik/OneDrive/Documents/Pyt
         return []
 
 
-def filter_transactions(list_transactions: dict, date_to: str) -> DataFrame:
-    """Функция, которая принимает список транзакций и текущую дату в формате ГГГГ-ММ-ДД.
+def filter_transactions(list_transactions: list, date_to: str) -> DataFrame:
+    """Функция, которая принимает список транзакций и текущую дату в формате YYYY-MM-DD HH:MM:SS.
     Возвращает отфильтрованный по дате ДатаФрейм.
     Фильтрация идет с начала текущего месяца и до текущего дня"""
-    pattern = re.compile(r'\d{4}-d{2}-d{2}')
+    pattern = re.compile(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}')
     if not re.match(pattern, date_to, flags=0):
-        logger_filter_transactions.error('Неверный формат даты! Возврат пустого датафрейма')
+        logger_filter_transactions.error(f'Неверный формат даты! Возврат пустого датафрейма {date_to}')
         return pd.DataFrame([])
     if not list_transactions:
         logger_filter_transactions.error('Список транзакций пуст! Возврат пустого датафрейма')
@@ -78,7 +78,7 @@ def top_transaction(df_top_transactions: DataFrame) -> list:
     """Функция принимает датафрейм и возвращает топ 5 транзакций"""
     logger_top_transact.info('Старт работы функции')
     try:
-        if not df_top_transactions:
+        if df_top_transactions.empty:
             logger_top_transact.error('Получен пустой датафрейм, возврат пустого списка')
             return []
 
@@ -101,6 +101,7 @@ def top_transaction(df_top_transactions: DataFrame) -> list:
         return result_top
 
     except Exception as ex:
+        print(df_top_transactions)
         logger_top_transact.error(f'Произошла ошибка в работе функции: {ex}')
         return []
 
@@ -112,7 +113,7 @@ def get_expenses_and_cashback(df_date: DataFrame) -> list: #df_date: DataFrame
     - кешбэк (1 рубль на каждые 100 рублей)."""
     logger_expenses.info('Старт работы функции')
 
-    if not df_date:
+    if df_date.empty:
         logger_excel.error('Ошибка, получен пустой список. Возврат пустого списка')
         return []
     try:
@@ -128,7 +129,7 @@ def get_expenses_and_cashback(df_date: DataFrame) -> list: #df_date: DataFrame
                 "total_spent": f'{expense_on_the_card}',
                 "cashback": f'{cashback}'
             })
-            logger_excel.info('Список успешно сформирован, возврат списка')
+        logger_excel.info('Список успешно сформирован, возврат списка')
         return list_expenses
     except Exception as ex:
         logger_excel.error(f'Ошибка работы функции: {ex}')
@@ -164,23 +165,18 @@ def get_stocks_prices(stocks: list) -> list:
     current_stock = (stock for stock in stocks)
 
     for _ in range(len(stocks)):
-        get_params = {
-                        'function': 'GLOBAL_QUOTE',
-                        'symbol': next(current_stock),
-                        "apikey": apy_key
-                      }
-
-        response_stock = requests.get(url, params=get_params)
+        params = {'ticker': next(current_stock)}
+        headers = {'X-Api-Key': apy_key}
+        response_stock = requests.get(url, headers= headers, params= params)
         if response_stock.status_code != 200:
             logger_stock.error(f'Получена ошибка на запрос: {response_stock}')
             return []
-
         data_stock = response_stock.json()
         price_stock.append({
-                              "stock": data_stock['Global Quote']['01. symbol'],
-                              "price": data_stock['Global Quote']['05. price']
+                              "stock": data_stock['ticker'],
+                              "price": data_stock['price']
                             })
-    logger_stock.info('')
+    logger_stock.info('Успешно получен ответ с сайта, возврат списка акций')
     return price_stock
 
 
