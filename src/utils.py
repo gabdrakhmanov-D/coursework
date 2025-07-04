@@ -1,7 +1,7 @@
 import datetime
 import json
 from decimal import Decimal
-from locale import currency
+
 
 import requests
 
@@ -12,12 +12,14 @@ load_dotenv()
 import pandas as pd
 import logging
 
-from pandas.core.interchange.dataframe_protocol import DataFrame
+
 
 logger_date = logging.getLogger('get_date')
 logger_excel = logging.getLogger('excel_reader')
 logger_expenses = logging.getLogger('get_expenses_and_cashback')
 logger_top_transact = logging.getLogger('top_transaction')
+logger_stock = logging.getLogger('get_stock')
+logger_currency_exchange = logging.getLogger('get_currency_exchange')
 
 
 def get_date():
@@ -118,7 +120,7 @@ def get_expenses_and_cashback() -> list: #df_date: DataFrame
 
 
 def get_json_from_file(path_to_file: str = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/user_settings.json') -> json:
-    """Функция для считывания json из файла"""
+    """Функция для считывания из json-файла список акций и валюты."""
     with open(path_to_file) as f:
         data = json.load(f)
         return data
@@ -132,15 +134,15 @@ def get_list_of_stocks() -> tuple[list, list]:
     stocks = data.get('user_stocks')
     return currencies, stocks
 
-def get_stocks_prices():
+
+def get_stocks_prices() -> list:
     """Функция для получения котировок акций."""
+
     url = os.getenv('URL')
     apy_key = os.getenv('API_KEY')
     currencies, stocks = get_list_of_stocks()
     price_stock = []
-    current_currencies = []
     current_stock = (stock for stock in stocks)
-    current_currency = (user_currency for user_currency in currencies)
 
     for _ in range(len(stocks)):
         get_params = {
@@ -149,54 +151,35 @@ def get_stocks_prices():
                         "apikey": apy_key
                       }
 
-        r = requests.get(url, params=get_params)
-        data_stock = r.json()
+        req_stock = requests.get(url, params=get_params)
+        data_stock = req_stock.json()
         price_stock.append({
                               "stock": data_stock['Global Quote']['01. symbol'],
                               "price": data_stock['Global Quote']['05. price']
                             })
-        # {
-        #     "Global Quote": {
-        #         "01. symbol": "IBM",
-        #         "02. open": "290.0000",
-        #         "03. high": "290.1900",
-        #         "04. low": "286.9000",
-        #         "05. price": "287.6500",
-        #         "06. volume": "3257515",
-        #         "07. latest trading day": "2025-07-02",
-        #         "08. previous close": "291.2000",
-        #         "09. change": "-3.5500",
-        #         "10. change percent": "-1.2191%"
-        #     }
-        # }
+    return price_stock
 
-    for _ in range(len(currencies)):
-        get_params = {
-                        'function': 'CURRENCY_EXCHANGE_RATE',
-                        'from_currency': 'RUB',
-                        'to_currency': next(current_currency),
-                        "apikey": apy_key
-                      }
-        r = requests.get(url, params=get_params)
-        data_currency = r.json()
-        current_currencies.append({
-                              "currency": data_currency['Realtime Currency Exchange Rate']['3. To_Currency Code'],
-                              "rate": data_currency['Realtime Currency Exchange Rate']['5. Exchange Rate']
-                            })
-    print(price_stock)
-    print(current_currencies)
 
-# get_stocks_prices()
-# {
-#     "Realtime Currency Exchange Rate": {
-#         "1. From_Currency Code": "USD",
-#         "2. From_Currency Name": "United States Dollar",
-#         "3. To_Currency Code": "JPY",
-#         "4. To_Currency Name": "Japanese Yen",
-#         "5. Exchange Rate": "145.04100000",
-#         "6. Last Refreshed": "2025-07-03 18:40:45",
-#         "7. Time Zone": "UTC",
-#         "8. Bid Price": "145.03910000",
-#         "9. Ask Price": "145.04640000"
-#     }
-# }
+def get_exchange_currency() -> list:
+    """Функция для получения курсов валют"""
+
+    url = os.getenv('URL_CURRENCY')
+    apy_key = os.getenv('API_KEY_CURRENCY')
+    currencies, stocks = get_list_of_stocks()
+    currency_pairs = [f'{user_currency}RUB' for user_currency in currencies]
+    pairs = ','.join(currency_pairs)
+
+    get_params = {
+                    'get': 'rates',
+                    'pairs': pairs,
+                    "key": apy_key
+                  }
+    req_currency = requests.get(url, params=get_params)
+    data_currency =  req_currency.json()
+    current_currencies = [
+        {
+          "currency": currency_pair,
+          "rate": data_currency['data'][currency_pair]
+        }
+        for currency_pair in currency_pairs]
+    return current_currencies
