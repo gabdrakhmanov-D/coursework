@@ -207,7 +207,7 @@ def get_exchange_currency(currencies: list) -> list:
     data_currency =  response_currency.json()
     current_currencies = [
         {
-          "currency": currency_pair,
+          "currency": currency_pair[:3],
           "rate": data_currency['data'][currency_pair]
         }
         for currency_pair in currency_pairs]

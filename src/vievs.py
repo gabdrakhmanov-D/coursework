@@ -46,16 +46,16 @@ def get_user_transactions(current_date: str) -> json:
         raise Exception('Ошибка в работе программы, не получены данные о транзакциях')
 
     user_currency, user_stocks = read_json_from_file(path_to_json_user_parameters)
-    # top_user_transactions = top_transaction(filtered_df)
-    # user_expenses_and_cashback = get_expenses_and_cashback(filtered_df)
+    top_user_transactions = top_transaction(filtered_df)
+    user_expenses_and_cashback = get_expenses_and_cashback(filtered_df)
     user_stocks_prices = get_stocks_prices(user_stocks)
-    # user_currency_exchange = get_exchange_currency(user_currency)
+    user_currency_exchange = get_exchange_currency(user_currency)
 
     result = {
-        # "greeting": greeting_value,
-        # "cards" : user_expenses_and_cashback,
-        # "top_transactions" : top_user_transactions,
-        # "currency_rates" : user_currency_exchange,
+        "greeting": greeting_value,
+        "cards" : user_expenses_and_cashback,
+        "top_transactions" : top_user_transactions,
+        "currency_rates" : user_currency_exchange,
         "stock_prices" : user_stocks_prices
     }
     return json.dumps(result, indent=4, ensure_ascii=False)
