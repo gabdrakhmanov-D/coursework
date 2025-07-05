@@ -29,6 +29,8 @@ isort = "^6.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.1"
+time-machine = "^2.16.0"
+freezegun = "^1.5.2"
 
 [flake8]
 max-line-length = 119
