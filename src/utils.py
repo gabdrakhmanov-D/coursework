@@ -30,7 +30,7 @@ def get_date():
     """Функция, которая возвращает строку с датой и временем в формате YYYY-MM-DD HH:MM:SS."""
     logger_date.info('Старт работы функции')
     current_date_time = datetime.datetime.now()
-    date_str= current_date_time.strftime("%Y-%m-%d %H:%M:%S")
+    date_str = current_date_time.strftime("%Y-%m-%d %H:%M:%S")
     logger_date.info('Дата успешно сформирована, возврат даты')
     return date_str
 
@@ -52,10 +52,6 @@ def filter_transactions(list_transactions: list, date_to: str) -> DataFrame:
     """Функция, которая принимает список транзакций и текущую дату в формате YYYY-MM-DD HH:MM:SS.
     Возвращает отфильтрованный по дате ДатаФрейм.
     Фильтрация идет с начала текущего месяца и до текущего дня"""
-    pattern = re.compile(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}')
-    if not re.match(pattern, date_to, flags=0):
-        logger_filter_transactions.error(f'Неверный формат даты! Возврат пустого датафрейма {date_to}')
-        return pd.DataFrame([])
     if not list_transactions:
         logger_filter_transactions.error('Список транзакций пуст! Возврат пустого датафрейма')
         return pd.DataFrame([])

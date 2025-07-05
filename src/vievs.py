@@ -36,16 +36,16 @@ def get_user_transactions(current_date: str) -> json:
     path_to_json_user_parameters = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/user_settings.json'
     path_to_user_excel_transactions = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/operations.xlsx'
 
-    user_transactions_from_excel = excel_file_reader(path_to_user_excel_transactions)
-    filtered_df = filter_transactions(user_transactions_from_excel, current_date)
+    user_transactions_from_excel = excel_file_reader(path_to_user_excel_transactions) # получение транзакций из excel файла
+    filtered_df = filter_transactions(user_transactions_from_excel, current_date) # получение отфильтрованного по дате датафрейма
     if filtered_df.empty:
         raise Exception('Ошибка в работе программы, не получены данные о транзакциях')
 
-    user_currency, user_stocks = read_json_from_file(path_to_json_user_parameters)
-    top_user_transactions = top_transaction(filtered_df)
-    user_expenses_and_cashback = get_expenses_and_cashback(filtered_df)
-    user_stocks_prices = get_stocks_prices(user_stocks)
-    user_currency_exchange = get_exchange_currency(user_currency)
+    user_currency, user_stocks = read_json_from_file(path_to_json_user_parameters) # получаем из json файла список акций и валют
+    top_user_transactions = top_transaction(filtered_df) # получаем топ 5 транзакций
+    user_expenses_and_cashback = get_expenses_and_cashback(filtered_df) # получаем расходы и инфо по каждой карте
+    user_stocks_prices = get_stocks_prices(user_stocks) # получаем цену акций
+    user_currency_exchange = get_exchange_currency(user_currency) # получаем курс валют
 
     result = {
         "greeting": greeting_value,
