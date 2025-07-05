@@ -12,7 +12,8 @@ import pandas as pd
                             {'date': '01.12.2021', 'amount': -64.0, 'category': 'Супермаркеты', 'description': 'Колхоз'},
                             {'date': '02.12.2021', 'amount': -118.12, 'category': 'Такси', 'description': 'Вези меня'},
                             {'date': '02.12.2021', 'amount': -51.0, 'category': 'Такси', 'description': 'Вези меня'},
-                            {'date': '03.12.2021', 'amount': -20.0, 'category': 'Такси', 'description': 'Вези меня'}]])
+                            {'date': '04.12.2021', 'amount': -1000.0,'category': 'Супермаркеты', 'description': 'Магнит'}
+                         ]])
 def test_top_transaction(return_sorted_dataframe, exception):
     """Тест успешного возврата топ 5 расходов"""
     assert top_transaction(return_sorted_dataframe) == exception
@@ -25,9 +26,6 @@ def test_top_transaction_empty_df():
 
 def test_top_transaction_exception(return_sorted_dataframe):
     """Тестирование случая, когда при выполнении функции возникает ошибка"""
-    # with patch('pandas.DataFrame.sort_values', side_effect= KeyError) as ex:
-    #     assert top_transaction(return_sorted_dataframe) == []
-    #     ex.assert_called_once_with()
     with patch.object(return_sorted_dataframe,'sort_values', side_effect= KeyError) as mock_sort:
         assert top_transaction(return_sorted_dataframe) == []
         mock_sort.assert_called_once_with('Сумма платежа', ascending=False, key=abs)
