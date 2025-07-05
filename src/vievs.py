@@ -1,9 +1,5 @@
 import json
 import logging
-import pandas as pd
-
-from numpy.f2py.crackfortran import is_free_format
-
 from src.utils import get_date, read_json_from_file, excel_file_reader, top_transaction, filter_transactions, \
     get_expenses_and_cashback, get_stocks_prices, get_exchange_currency
 

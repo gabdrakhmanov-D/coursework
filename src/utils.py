@@ -32,8 +32,8 @@ def get_date():
     current_date_time = datetime.datetime.now()
     date_str= current_date_time.strftime("%Y-%m-%d %H:%M:%S")
     logger_date.info('Дата успешно сформирована, возврат даты')
-    # return date_str
-    return '2021-12-05 15:20:53.'
+    return date_str
+
 
 def excel_file_reader(path_to_file: str = 'C:/Users/rubik/OneDrive/Documents/Pyton/course_work/data/operations.xlsx') -> list:
     """Функция для считывания финансовых операций из Excel, принимает путь к файлу Excel в качестве аргумента.
