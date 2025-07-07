@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
-import pytest
 import pandas as pd
+import pytest
 
 from src.utils import excel_file_reader
 

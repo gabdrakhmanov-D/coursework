@@ -32,15 +32,12 @@ def test_read_json_from_file_not_found():
         mock_data.assert_called_once_with("test")
 
 
-@pytest.mark.parametrize("expected, test_list", [((["USD", "EUR"], ["AAPL", "AMZN"]),
-                                                  '{"user_currencies": ["USD", "EUR"], "user_stocks": ["AAPL", "AMZN"]}'
-                                                  )])
+@pytest.mark.parametrize(
+    "expected, test_list",
+    [((["USD", "EUR"], ["AAPL", "AMZN"]), '{"user_currencies": ["USD", "EUR"], "user_stocks": ["AAPL", "AMZN"]}')],
+)
 def test_read_json_from_file_success(test_list, expected):
     """Тестирование успешного чтения файла"""
-    with patch(
-        "builtins.open",
-            new_callable=mock.mock_open,
-            read_data=f"{test_list}"
-            ) as mock_data:
+    with patch("builtins.open", new_callable=mock.mock_open, read_data=f"{test_list}") as mock_data:
         assert read_json_from_file("test") == expected
         mock_data.assert_called_once_with("test")
