@@ -47,10 +47,6 @@ def filter_transactions(list_transactions: list, date_to: str) -> DataFrame:
     """Функция, которая принимает список транзакций и текущую дату в формате YYYY-MM-DD HH:MM:SS.
     Возвращает отфильтрованный по дате ДатаФрейм.
     Фильтрация идет с начала текущего месяца и до текущего дня"""
-    if not list_transactions:
-        logger_filter_transactions.error("Список транзакций пуст! Возврат пустого датафрейма")
-        return pd.DataFrame([])
-    logger_filter_transactions.info("Старт работы функции")
     try:
         date_day = int(date_to[8:10])
         date_month = int(date_to[5:7])
@@ -107,10 +103,6 @@ def get_expenses_and_cashback(df_date: DataFrame) -> list:  # df_date: DataFrame
     - общая сумма расходов;
     - кешбэк (1 рубль на каждые 100 рублей)."""
     logger_expenses.info("Старт работы функции")
-
-    if df_date.empty:
-        logger_excel.error("Ошибка, получен пустой список. Возврат пустого списка")
-        return []
     try:
         logger_expenses.info("Получен дата фрейм, началась обработка")
         expenses = df_date[df_date["Сумма платежа"] < 0]
@@ -149,7 +141,7 @@ def read_json_from_file(path_to_file: str) -> tuple[list, list]:
 
 
 def get_stocks_prices(stocks: list) -> list:
-    """Функция для получения котировок акций. Принимает список акций и возвращает их стоиость."""
+    """Функция для получения котировок акций. Принимает список акций и возвращает их стоимость."""
 
     logger_stock.info("Получен список акций. Старт работы функции")
     url = os.getenv("URL")

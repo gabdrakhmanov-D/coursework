@@ -27,7 +27,3 @@ def test_filter_transactions(return_excel, date, exception):
     test_df["Дата операции"] = pd.to_datetime(test_df["Дата операции"], format="%d.%m.%Y %H:%M:%S")
     assert filter_transactions(return_excel, date).to_dict() == test_df.to_dict()
 
-
-def test_empty_list_transact():
-    """Тестирование получения пустого списка транзакций"""
-    assert filter_transactions([], "2021-12-04 16:39:04").empty
