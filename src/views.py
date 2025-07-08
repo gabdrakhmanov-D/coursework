@@ -2,15 +2,8 @@ import json
 import logging
 
 from config import PATH_TO_LOGGER, PATH_TO_OPERATIONS, PATH_TO_USER_SETTINGS
-from src.utils import (
-    excel_file_reader,
-    filter_transactions,
-    get_exchange_currency,
-    get_expenses_and_cashback,
-    get_stocks_prices,
-    read_json_from_file,
-    top_transaction,
-)
+from src.utils import (excel_file_reader, filter_transactions, get_exchange_currency, get_expenses_and_cashback,
+                       get_stocks_prices, read_json_from_file, top_transaction)
 
 logging.basicConfig(
     level=logging.DEBUG,

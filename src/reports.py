@@ -1,10 +1,10 @@
 import json
 import logging
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
-import pandas as pd
 from functools import wraps
 
+import pandas as pd
+from dateutil.relativedelta import relativedelta
 
 logger_write_to_file = logging.Logger('write_to_file')
 logger_spending = logging.Logger('spending_by_category')
@@ -25,11 +25,13 @@ def write_to_file(filename: str = None):
                 return result
             if filename:
                 with open(f'{filename}.json', 'w', encoding='utf-8',) as file:
+                    result = result.to_dict('records')
                     json.dump(result, file, ensure_ascii=False, indent=4)
                     logger_write_to_file.info(f'Запись результата в файл: {filename}')
                 return result
             else:
                 with open('report_by_category.json', 'w', encoding='utf-8') as file:
+                    result = result.to_dict('records')
                     json.dump(result, file, ensure_ascii=False, indent=4)
                     logger_write_to_file.info('Запись результата в файл: report_by_category.json')
                 return result

@@ -1,8 +1,9 @@
 import datetime
 import json
+import logging
 import os
 from decimal import Decimal
-import logging
+
 import pandas as pd
 import requests
 from dotenv import load_dotenv
