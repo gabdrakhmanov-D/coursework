@@ -5,7 +5,6 @@ from config import PATH_TO_LOGGER, PATH_TO_OPERATIONS, PATH_TO_USER_SETTINGS
 from src.utils import (
     excel_file_reader,
     filter_transactions,
-    get_date,
     get_exchange_currency,
     get_expenses_and_cashback,
     get_stocks_prices,

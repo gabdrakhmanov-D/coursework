@@ -76,6 +76,7 @@ def return_sorted_dataframe():
         }
     )
 
+
 @pytest.fixture
 def return_excel_transfers():
     return [
@@ -158,10 +159,10 @@ def result_transfers():
             "Описание": "Saymon P.",
         }
     ]
-    result_json = json.dumps(result_list, ensure_ascii= False, indent=4)
+    result_json = json.dumps(result_list, ensure_ascii=False, indent=4)
     return result_json
 
 
 @pytest.fixture
 def transfers_error():
-    return json.dumps('Не удалось получить список переводов', ensure_ascii= False)
+    return json.dumps('Не удалось получить список переводов', ensure_ascii=False)
