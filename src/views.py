@@ -128,7 +128,3 @@ def get_user_operations(current_date: str) -> json:
         "stock_prices": user_stocks_prices,
     }
     return json.dumps(result, indent=4, ensure_ascii=False)
-
-
-if __name__ == "__main__":
-    print(get_user_operations(get_date()))
