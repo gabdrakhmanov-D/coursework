@@ -20,7 +20,7 @@ def test_stocks_prices_error_request():
 
 
 def test_stocks_prices():
-    """Тестирование успешного получения курсов валют"""
+    """Тестирование успешного получения цены акций"""
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"ticker": "AMZN", "price": 100}

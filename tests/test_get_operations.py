@@ -171,7 +171,7 @@ def test_get_user_operations_no_json(result, example_df):
     ],
 )
 def test_get_user_operations_no_stock(result, example_df):
-    """Тестирование случая когда нет списка акций"""
+    """Тестирование случая когда нет списка валют"""
     with (
         patch("src.views.excel_file_reader", return_value=["excel_data"]),
         patch("src.views.filter_transactions", return_value=example_df),

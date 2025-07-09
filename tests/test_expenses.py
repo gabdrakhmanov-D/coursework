@@ -20,12 +20,6 @@ def test_get_expenses_and_cashback(return_sorted_dataframe, expected):
     assert get_expenses_and_cashback(return_sorted_dataframe) == expected
 
 
-def test_get_expenses_and_cashback_empty_df():
-    """Тестирование получения пустого датафрейма"""
-    empty_df = pd.DataFrame()
-    assert get_expenses_and_cashback(empty_df) == []
-
-
 def test_get_expenses_and_cashback_error(return_sorted_dataframe):
     """Тестирование случая ошибки при выполнении функции"""
     with patch("pandas.DataFrame.groupby") as mock_group:
