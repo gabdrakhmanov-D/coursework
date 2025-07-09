@@ -26,10 +26,14 @@ def start_functionality():
     user_transfers = search_for_transfers(list_transactions)
     report_date = input('Введите конечную дату формирования отчета в формате: dd.mm.yyyy.\n')
     selected_category = input('Введите категорию для формирования отчета, например: "Транспорт".\n')
-    need_report_file_name = input('Хотите назвать файл отчета? По умолчанию файл будет назван report_by_category. Да/Нет\n').capitalize()
+    need_report_file_name = input('''Хотите назвать файл отчета?
+По умолчанию файл будет назван report_by_category. Да/Нет\n''').capitalize()
     if need_report_file_name == 'Да':
         report_file_name = input('Введите название файла, для сохранения отчета\n')
     else:
         report_file_name = None
     write_to_file(report_file_name)(spending_by_category)(df_transactions, selected_category, report_date)
     return user_operations, user_transfers
+
+if __name__ == '__main__':
+    start_functionality()
