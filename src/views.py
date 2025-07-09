@@ -16,7 +16,7 @@ logging.basicConfig(
 logger_user_operations = logging.getLogger("user_transactions")
 
 
-def get_user_operations(current_date: str) -> json:
+def get_user_operations(current_date: str) -> str:
     """Функция принимает текущую дату и возвращает:
     Приветствие в формате
     "???", где ??? — «Доброе утро» / «Добрый день» / «Добрый вечер» / «Доброй ночи» в зависимости от текущего времени.

@@ -7,7 +7,7 @@ import pandas as pd
 logger_transfers = logging.Logger('search_for_transfers')
 
 
-def search_for_transfers(list_transactions: list) -> json:
+def search_for_transfers(list_transactions: list) -> str:
     """Функция возвращает JSON со всеми транзакциями, которые относятся к переводам физлицам."""
     logger_transfers.info('Старт работы функции')
     try:
