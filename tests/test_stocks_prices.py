@@ -9,8 +9,8 @@ def test_stocks_prices_error_request():
     mock_response = MagicMock()
     mock_response.status_code = 404
     mock_response.json.return_value = {"ticker": "AMZN", "price": 100}
-    url = os.getenv("URL")
-    apy_key = os.getenv("API_KEY")
+    url = os.getenv("URL_STOCK")
+    apy_key = os.getenv("API_KEY_STOCK")
     params = {"ticker": "AMZN"}
     headers = {"X-Api-Key": apy_key}
     with patch("requests.get") as mock_get:
@@ -24,8 +24,8 @@ def test_stocks_prices():
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"ticker": "AMZN", "price": 100}
-    url = os.getenv("URL")
-    apy_key = os.getenv("API_KEY")
+    url = os.getenv("URL_STOCK")
+    apy_key = os.getenv("API_KEY_STOCK")
     params = {"ticker": "AMZN"}
     headers = {"X-Api-Key": apy_key}
     with patch("requests.get") as mock_get:
