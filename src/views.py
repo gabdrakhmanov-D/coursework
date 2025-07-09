@@ -5,15 +5,7 @@ from config import PATH_TO_LOGGER, PATH_TO_OPERATIONS, PATH_TO_USER_SETTINGS
 from src.utils import (excel_file_reader, filter_transactions, get_exchange_currency, get_expenses_and_cashback,
                        get_stocks_prices, read_json_from_file, top_transaction)
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(filename)s - %(funcName)s - %(levelname)s - %(message)s",
-    filename=PATH_TO_LOGGER,
-    filemode="w",
-    encoding="utf-8",
-)
-
-logger_user_operations = logging.getLogger("user_transactions")
+logger_user_operations = logging.getLogger("user_operations")
 
 
 def get_user_operations(current_date: str) -> str:
@@ -27,7 +19,7 @@ def get_user_operations(current_date: str) -> str:
     - Топ-5 транзакций по сумме платежа.
     - Курс валют.
     - Стоимость акций из S&P500."""
-
+    logger_user_operations.info('Старт работы функции')
     if 12 > int(current_date[11:13]) > 6:
         greeting_value = "Доброе утро!"
     elif 18 > int(current_date[11:13]) >= 12:
@@ -36,26 +28,29 @@ def get_user_operations(current_date: str) -> str:
         greeting_value = "Добрый вечер!"
     else:
         greeting_value = "Доброй ночи!"
+    logger_user_operations.info(f'Получено значение: {greeting_value}')
 
-    path_to_json_user_parameters = PATH_TO_USER_SETTINGS
-    path_to_user_excel_transactions = PATH_TO_OPERATIONS
-
-    user_transactions_from_excel = excel_file_reader(
-        path_to_user_excel_transactions
-    )  # получение транзакций из excel файла
+    user_transactions_from_excel = excel_file_reader(PATH_TO_OPERATIONS)  # получение транзакций из excel файла
     if not user_transactions_from_excel:
+        logger_user_operations.error('Не получен список транзакций из excel файла!')
         user_expenses_and_cashback, top_user_transactions = "Данные не получены", "Данные не получены"
-        user_currency, user_stocks = read_json_from_file(path_to_json_user_parameters)
+        user_currency, user_stocks = read_json_from_file(PATH_TO_USER_SETTINGS)
         if not user_currency and not user_stocks:
+            logger_user_operations.error('Не получен список акций и валют!')
             user_currency_exchange = "Не выбрана валюта для получения курса"
             user_stocks_prices = "Не выбраны акции для получения цены"
         elif not user_currency:
+            logger_user_operations.error('Не получен список валют!')
             user_currency_exchange = "Не выбрана валюта для получения курса"
+            logger_user_operations.info('Получаем цену акций')
             user_stocks_prices = get_stocks_prices(user_stocks)  # получаем цену акций
         elif not user_stocks:
+            logger_user_operations.error('Не получен список акций!')
             user_stocks_prices = "Не выбраны акции для получения цены"
+            logger_user_operations.info('Получаем курс валют')
             user_currency_exchange = get_exchange_currency(user_currency)  # получаем курс валют
         else:
+            logger_user_operations.info('Получаем цену акций и курс валют')
             user_stocks_prices = get_stocks_prices(user_stocks)  # получаем цену акций
             user_currency_exchange = get_exchange_currency(user_currency)  # получаем курс валют
         result = {
@@ -65,24 +60,32 @@ def get_user_operations(current_date: str) -> str:
             "currency_rates": user_currency_exchange,
             "stock_prices": user_stocks_prices,
         }
+        logger_user_operations.info('Возврат результата.')
         return json.dumps(result, indent=4, ensure_ascii=False)
 
     filtered_df = filter_transactions(
         user_transactions_from_excel, current_date
     )  # получение отфильтрованного по дате датафрейма
     if filtered_df.empty:
+        logger_user_operations.error('Не получен отфильтрованный датафрейм!')
         user_expenses_and_cashback, top_user_transactions = "Данные не получены", "Данные не получены"
-        user_currency, user_stocks = read_json_from_file(path_to_json_user_parameters)
+        user_currency, user_stocks = read_json_from_file(PATH_TO_USER_SETTINGS)
         if not user_currency and not user_stocks:
+            logger_user_operations.error('Не получен список акций и валют!')
             user_currency_exchange = "Не выбрана валюта для получения курса"
             user_stocks_prices = "Не выбраны акции для получения цены"
         elif not user_currency:
+            logger_user_operations.error('Не получен список валют!')
             user_currency_exchange = "Не выбрана валюта для получения курса"
+            logger_user_operations.info('Получаем цену акций')
             user_stocks_prices = get_stocks_prices(user_stocks)  # получаем цену акций
         elif not user_stocks:
+            logger_user_operations.error('Не получен список акций!')
             user_stocks_prices = "Не выбраны акции для получения цены"
+            logger_user_operations.info('Получаем курс валют')
             user_currency_exchange = get_exchange_currency(user_currency)  # получаем курс валют
         else:
+            logger_user_operations.info('Получаем цену акций и курс валют')
             user_stocks_prices = get_stocks_prices(user_stocks)  # получаем цену акций
             user_currency_exchange = get_exchange_currency(user_currency)  # получаем курс валют
         result = {
@@ -96,19 +99,23 @@ def get_user_operations(current_date: str) -> str:
 
     top_user_transactions = top_transaction(filtered_df)  # получаем топ 5 транзакций
     user_expenses_and_cashback = get_expenses_and_cashback(filtered_df)  # получаем расходы и инфо по каждой карте
-    user_currency, user_stocks = read_json_from_file(
-        path_to_json_user_parameters
-    )  # получаем из json файла список акций и валют
+    user_currency, user_stocks = read_json_from_file(PATH_TO_USER_SETTINGS)  # получаем из json файла список акций и валют
     if not user_currency and not user_stocks:
+        logger_user_operations.error('Не получен список акций и валют!')
         user_currency_exchange = "Не выбрана валюта для получения курса"
         user_stocks_prices = "Не выбраны акции для получения цены"
     elif not user_currency:
+        logger_user_operations.error('Не получен список валют!')
         user_currency_exchange = "Не выбрана валюта для получения курса"
+        logger_user_operations.info('Получаем цену акций')
         user_stocks_prices = get_stocks_prices(user_stocks)  # получаем цену акций
     elif not user_stocks:
+        logger_user_operations.error('Не получен список акций!')
         user_stocks_prices = "Не выбраны акции для получения цены"
+        logger_user_operations.info('Получаем курс валют')
         user_currency_exchange = get_exchange_currency(user_currency)  # получаем курс валют
     else:
+        logger_user_operations.info('Получаем цену акций и курс валют')
         user_stocks_prices = get_stocks_prices(user_stocks)  # получаем цену акций
         user_currency_exchange = get_exchange_currency(user_currency)  # получаем курс валют
 
