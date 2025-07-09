@@ -145,8 +145,8 @@ def get_stocks_prices(stocks: list) -> list:
     """Функция для получения котировок акций. Принимает список акций и возвращает их стоимость."""
 
     logger_stock.info("Получен список акций. Старт работы функции")
-    url = os.getenv("URL")
-    apy_key = os.getenv("API_KEY")
+    url = os.getenv("URL_STOCK")
+    apy_key = os.getenv("API_KEY_STOCK")
     price_stock = []
     current_stock = (stock for stock in stocks)
 

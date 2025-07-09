@@ -35,5 +35,6 @@ def start_functionality():
     write_to_file(report_file_name)(spending_by_category)(df_transactions, selected_category, report_date)
     return user_operations, user_transfers
 
+
 if __name__ == '__main__':
     start_functionality()
