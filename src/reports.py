@@ -39,7 +39,7 @@ def write_to_file(filename: str = None):
     return decorator
 
 
-@write_to_file()
+# @write_to_file()
 def spending_by_category(transactions: pd.DataFrame,
                          category: str,
                          current_date: str = None) -> pd.DataFrame:

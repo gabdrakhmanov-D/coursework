@@ -2,7 +2,9 @@ import json
 from unittest import mock
 from unittest.mock import patch, mock_open
 import pandas as pd
-from src.reports import write_to_file
+import pytest
+
+from src.reports import write_to_file, spending_by_category
 
 
 def test_write_to_file():
@@ -41,3 +43,34 @@ def test_write_to_file_empty_df():
             return df
         result = get_dataframe()
     mock_data.assert_not_called()
+
+
+#тесты для функции spending_by_category
+@pytest.mark.parametrize('expected', [
+                                        [{'Дата операции': '01.12.2021',
+                                          'Дата платежа': '01.12.2021',
+                                          'Категория': 'Супермаркеты',
+                                          'Номер карты': '*7197',
+                                          'Описание': 'Колхоз',
+                                          'Сумма операции': -160.89,
+                                          'Сумма платежа': -160.89},
+                                         {'Дата операции': '01.11.2021',
+                                          'Дата платежа': '01.11.2021',
+                                          'Категория': 'Супермаркеты',
+                                          'Номер карты': '*7197',
+                                          'Описание': 'Колхоз',
+                                          'Сумма операции': -64.0,
+                                          'Сумма платежа': -64.0},
+                                         {'Дата операции': '02.10.2021',
+                                          'Дата платежа': '02.10.2021',
+                                          'Категория': 'Супермаркеты',
+                                          'Номер карты': '*7197',
+                                          'Описание': 'Вези меня',
+                                          'Сумма операции': -118.12,
+                                          'Сумма платежа': -118.12}]])
+def test_spending_by_category(return_dataframe_for_spending_by_category, expected):
+    """Тестирование успешной работы функции"""
+    result = spending_by_category(return_dataframe_for_spending_by_category,
+                                  "Супермаркеты",
+                                  "31.12.2021").to_dict('records')
+    assert result == expected
